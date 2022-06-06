@@ -5,9 +5,8 @@ import List from './components/List.vue';
 </script>
 
 <template>
-  Oh nice!
   <Suspense>
-    <List :items="[]" />
+    <List />
   </Suspense>
 
 </template>

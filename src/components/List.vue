@@ -1,26 +1,28 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+type Todo = { userId: Number, title: String, id: Number, completed: Boolean }
 
-defineProps<{ items: Array<Object> }>()
-
-// let items: Array<Object> = []
-
-let api_data = await GetData()
-console.log(api_data);
-
-let items = api_data
+let items: Array<Todo> = await GetData()
 
 async function GetData(API_URL = 'https://jsonplaceholder.typicode.com/todos/'): Promise<any> {
   let res = await fetch(API_URL)
-  return res.json();
+  if (res.ok == false) {
+    return []
+  }
+  return [...(await res.json())];
 }
+
+console.log(items);
 
 </script>
 
 <template>
   <ul>
     <li v-for="item in items">
+      {{ item.id }}
+      {{ item.userId }}
       {{ item.title }}
+      {{ item.completed }}
     </li>
   </ul>
 </template>
