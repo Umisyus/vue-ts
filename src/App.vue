@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import List from './components/List.vue';
+import TodoList from './components/List.vue';
 
 </script>
 
 <template>
   <Suspense>
-    <List />
+    <TodoList />
+
   </Suspense>
 
 </template>
