@@ -2,33 +2,51 @@
 import { onMounted, ref } from 'vue'
 import { MutationPayload, Payload, useStore } from 'vuex';
 import GetData from "../API"
+import { Todo } from './Data/Todo'
 // Type of Todos for type inference / Auto completion
-type Todo = { userId: Number, title: String, id: Number, completed: Boolean }
-
-let items: Array<Todo> = await GetData()
-
 const store = useStore()
 
-function increment() {
-  // Payload (2nd argument) is the data we want to enter the store
-  store.commit('increment', { count: +1 })
-  console.log(store.state.count);
+let items: Array<Todo> = ref(await GetData())
+items = getAllTodosInStore() || []
+
+function getAllTodosInStore() { return store.getters.allTodos }
+
+
+function addTodo(todo: Todo) {
+  store.commit('addTodo', { todo: todo })
+  // items = store.state
+
+  items.push = getAllTodosInStore()
+
+  console.log(store.state.todos);
+  console.log(store.state.todos.length);
+
 }
 
-function decrement() {
-  store.commit('decrement', { count: -1 })
-  console.log(store.state.count);
+function alsoAddTodo({ userId, title, id, completed }
+  : { userId: String, title: String, id: Number, completed: Boolean }): void {
+  store.commit('addTodo', { todo: { userId, title, id, completed } })
 }
 
-console.log(store.state.count);
+function delTodo(todoId: Number) {
+  store.commit('deleteTodo', { id: todoId })
+}
+
+console.log(store.state.todos.length);
 
 </script>
 
 <template>
   <div class="btn-z" style="margin:5%; width: 100%; display: flex;">Increment/Decrement w/ Store
 
-    <button class="btn" @click="increment">Count UP!</button>
-    <button class="btn" @click="decrement">Count DOWN!</button>
+    <form action="addTodo()" method="post">
+      <label>Todo Id:</label> <input type="text">
+      <label>Todo title:</label> <input type="text">
+
+    </form>
+
+    <button class="btn" @click="addTodo({ id: 0, title: '', userId: 0, completed: false })">Add Todo!</button>
+
   </div>
 
   <div class="">List of Todos from Web</div>
