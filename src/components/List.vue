@@ -3,10 +3,16 @@ import { onMounted, ref } from 'vue'
 import { MutationPayload, Payload, useStore } from 'vuex';
 import GetData from "../API"
 import { Todo } from './Data/Todo'
+
 // Type of Todos for type inference / Auto completion
 const store = useStore()
 
+// Todo container
+let todo: Todo = {};
+
+// Array of todos in page
 let items: Array<Todo> = ref(await GetData())
+// Temp
 items = getAllTodosInStore() || []
 
 function getAllTodosInStore() { return store.getters.allTodos }
@@ -40,8 +46,10 @@ console.log(store.state.todos.length);
   <div class="btn-z" style="margin:5%; width: 100%; display: flex;">Increment/Decrement w/ Store
 
     <form action="addTodo()" method="post">
-      <label>Todo Id:</label> <input type="text">
-      <label>Todo title:</label> <input type="text">
+      <label>Todo Id:</label> <input type="text" v-model="todo.id">
+      <label>Todo Id:</label> <input type="text" v-model="todo.userId">
+      <label>Todo title:</label> <input type="text" v-model="todo.title">
+      <label>Todo title:</label> <input type="text" v-model="todo.completed">
 
     </form>
 
