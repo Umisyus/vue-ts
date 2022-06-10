@@ -1,69 +1,21 @@
-<script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { MutationPayload, Payload, useStore } from 'vuex';
-import GetData from "../API"
-import { Todo } from './Data/Todo'
-
-// Type of Todos for type inference / Auto completion
-const store = useStore()
-
-// Todo container
-let todo: Todo = {};
-
-// Array of todos in page
-let items: Array<Todo> = ref(await GetData())
-// Temp
-items = getAllTodosInStore() || []
-
-function getAllTodosInStore() { return store.getters.allTodos }
-
-
-function addTodo(todo: Todo) {
-  store.commit('addTodo', { todo: todo })
-  // items = store.state
-
-  items.push = getAllTodosInStore()
-
-  console.log(store.state.todos);
-  console.log(store.state.todos.length);
-
-}
-
-function alsoAddTodo({ userId, title, id, completed }
-  : { userId: String, title: String, id: Number, completed: Boolean }): void {
-  store.commit('addTodo', { todo: { userId, title, id, completed } })
-}
-
-function delTodo(todoId: Number) {
-  store.commit('deleteTodo', { id: todoId })
-}
-
-console.log(store.state.todos.length);
-
-</script>
-
 <template>
   <div class="btn-z" style="margin:5%; width: 100%; display: flex;">Increment/Decrement w/ Store
 
-    <form action="addTodo()" method="post">
-      <label>Todo Id:</label> <input type="text" v-model="todo.id">
-      <label>Todo Id:</label> <input type="text" v-model="todo.userId">
-      <label>Todo title:</label> <input type="text" v-model="todo.title">
-      <label>Todo title:</label> <input type="text" v-model="todo.completed">
 
-    </form>
+    <label>Todo title: </label> <input type="text" v-model="todoTitle">
+    <label>Todo title:</label> <input type="checkbox" value="true" v-model="todoCompleted">
 
-    <button class="btn" @click="addTodo({ id: 0, title: '', userId: 0, completed: false })">Add Todo!</button>
+    <button class="btn" @keypress.enter="addTodo">Add
+      Todo!</button>
 
   </div>
 
   <div class="">List of Todos from Web</div>
   <ul>
-    <li v-for="item in items">
-      {{ item.id }}
-      {{ item.userId }}
-      {{ item.title }}
-      {{ item.completed }}
+    todos
+    <li v-for="item in todos">
+      {{ item.todo.title }}
+      {{ item.todo.completed ? '√' : 'X'}}
     </li>
   </ul>
 </template>
@@ -92,3 +44,58 @@ code {
   flex-wrap: wrap;
 }
 </style>
+
+
+
+<script lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { MutationPayload, Payload, useStore } from 'vuex';
+import GetData from "../API"
+import { Todo } from './Data/Todo'
+
+
+export default {
+
+  setup() {
+    // Type of Todos for type inference / Auto completion
+    const store = useStore()
+
+    // Todo container
+    let todos = computed(() => store.state.todos)
+
+    let todoTitle = ref("");
+    let todoCompleted = ref(false);
+
+    // Array of todos in page
+
+    function getAllTodosInStore() { return store.state.todos }
+
+    function addTodo() {
+      // if (todo == null || todo == undefined) {
+      //   throw new Error("Todo was NULL or UNDEFINED")
+      // }
+
+      // Default values for user id
+      let thisTodo = { title: todoTitle, completed: todoCompleted }
+
+      store.commit('addTodo', { todo: thisTodo })
+
+      console.log(store.state.todos);
+      console.log("Total todos: " + store.state.todos.length);
+    }
+
+    function alsoAddTodo({ userId, title, id, completed }
+      : { userId: String, title: String, id: Number, completed: Boolean }): void {
+      store.commit('addTodo', { todo: { userId, title, id, completed } })
+    }
+
+    function delTodo(todoId: Number) {
+      store.commit('deleteTodo', { id: todoId })
+    }
+
+    console.log(getAllTodosInStore());
+
+    return { todos, todoTitle, todoCompleted, addTodo }
+  }
+}
+</script>
