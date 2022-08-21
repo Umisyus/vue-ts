@@ -1,101 +1,85 @@
 <template>
-  <div class="btn-z" style="margin:5%; width: 100%; display: flex;">Increment/Decrement w/ Store
+  <h1>ToDo App</h1>
+  <form @submit.prevent="addTodo()">
+    <label>New ToDo </label>
+
+    <!-- Object which stores todo data and is passed to the event handler -->
+    <input v-model="newTodo.content" name="newTodo" autocomplete="off">
+    <!-- Done checkbox -->
+    <input type="checkbox" v-model="newTodo.done">
+
+    <button>Add ToDo</button>
+  </form>
 
 
-    <label>Todo title: </label> <input type="text" v-model="todoTitle">
-    <label>Todo title:</label> <input type="checkbox" value="true" v-model="todoCompleted">
-
-    <button class="btn" @keypress.enter="addTodo">Add
-      Todo!</button>
-
-  </div>
-
-  <div class="">List of Todos from Web</div>
+  <h2>ToDo List</h2>
+  <button @click="removeAll()">Remove All</button>
   <ul>
-    todos
-    <li v-for="item in todos">
-      {{ item.todo.title }}
-      {{ item.todo.completed ? '√' : 'X'}}
+
+    <li v-for="(todo, index) in todos" :key="index">
+      <!-- // Mark done -->
+      <div v-if="todo.done"> √ </div>
+      <div v-else> X </div>
+      <span :class="{ done: todo.done }" @click="doneTodo(todo)">{{ todo.content }}</span>
+      <!-- // Delete -->
+      <button @click="removeTodo(index)">Remove</button>
     </li>
+
   </ul>
+  <h4 v-if="todos.length === 0">Empty list.</h4>
 </template>
-
-<style scoped>
-a {
-  color: #42b983;
-}
-
-code {
-  background-color: #eee;
-  padding: 2px 4px;
-  border-radius: 4px;
-  color: #304455;
-}
-
-.btn-z {
-  margin-bottom: 5%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.btn {
-  max-width: 5%;
-  flex-wrap: wrap;
-}
-</style>
-
 
 
 <script lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { MutationPayload, Payload, useStore } from 'vuex';
-import GetData from "../API"
-import { Todo } from './Data/Todo'
 
-
+import { ref } from 'vue';
 export default {
-
+  name: 'App',
   setup() {
-    // Type of Todos for type inference / Auto completion
-    const store = useStore()
-
-    // Todo container
-    let todos = computed(() => store.state.todos)
-
-    let todoTitle = ref("");
-    let todoCompleted = ref(false);
-
-    // Array of todos in page
-
-    function getAllTodosInStore() { return store.state.todos }
-
+    const newTodo = ref({ content: '', done: false });
+    const defaultData = [{
+      done: false,
+      content: 'Write a blog post'
+    }]
+    const todosData = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
+    const todos = ref(todosData);
     function addTodo() {
-      // if (todo == null || todo == undefined) {
-      //   throw new Error("Todo was NULL or UNDEFINED")
-      // }
-
-      // Default values for user id
-      let thisTodo = { title: todoTitle, completed: todoCompleted }
-
-      store.commit('addTodo', { todo: thisTodo })
-
-      console.log(store.state.todos);
-      console.log("Total todos: " + store.state.todos.length);
+      if (newTodo.value) {
+        todos.value.push({
+          done: newTodo.value.done,
+          content: newTodo.value.content
+        });
+        newTodo.value.content = '';
+      }
+      saveData();
     }
-
-    function alsoAddTodo({ userId, title, id, completed }
-      : { userId: String, title: String, id: Number, completed: Boolean }): void {
-      store.commit('addTodo', { todo: { userId, title, id, completed } })
+    function doneTodo(todo: { done: boolean; }) {
+      todo.done = !todo.done
+      saveData();
     }
-
-    function delTodo(todoId: Number) {
-      store.commit('deleteTodo', { id: todoId })
+    function removeTodo(index: number) {
+      todos.value.splice(index, 1);
+      saveData();
     }
+    function removeAll() {
+      confirm('Are you sure you want to remove all todos?');
 
-    console.log(getAllTodosInStore());
-
-    return { todos, todoTitle, todoCompleted, addTodo }
+      localStorage.setItem('todos', JSON.stringify([]));
+      saveData();
+    }
+    function saveData() {
+      const storageData = JSON.stringify(todos.value);
+      localStorage.setItem('todos', storageData);
+    }
+    return {
+      todos,
+      newTodo,
+      addTodo,
+      doneTodo,
+      removeTodo,
+      saveData,
+      removeAll
+    }
   }
 }
 </script>
