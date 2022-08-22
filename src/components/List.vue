@@ -20,7 +20,9 @@
       <!-- // Mark done -->
       <div v-if="todo.done"> √ </div>
       <div v-else> X </div>
-      <span :class="{ done: todo.done }" @click="doneTodo(todo)">{{ todo.content }}</span>
+      <span :class="{ done: todo.done }" @click="doneTodo(todo)">
+        {{ todo.content }}
+      </span>
       <!-- // Delete -->
       <button @click="removeTodo(index)">Remove</button>
     </li>
@@ -35,6 +37,7 @@
 import GetData from '@/API';
 import { WebTodo } from '@/WebTodos';
 import { ref } from 'vue';
+import { Todo } from './Data/Todo';
 export default {
   name: 'App',
   async setup() {
@@ -45,23 +48,46 @@ export default {
     }]
     // Local storage
     // const todosData = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
-    const localTodos = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
-    let webData = await GetData<WebTodo>().then(data =>
-      data.map(item => { return { content: item.title, done: item.completed } }));
+    const localTodos: Todo[] = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
 
     // Web example
-    const todosData = webData ?? localTodos ?? defaultData;
+    let webData = await GetData<WebTodo>().then(data =>
+      data.map(item => {
+        return { content: item.title, done: item.completed }
+        // Fix type error
+      })) as Todo[];
+
+    webData = []
+
+    const todosData: Todo[] =
+      localTodos.concat(webData) ?? defaultData;
     const todos = ref(todosData);
+
     function addTodo() {
       if (newTodo.value) {
-        todos.value.push({
-          done: newTodo.value.done,
-          content: newTodo.value.content
-        });
-        newTodo.value.content = '';
+        //push todo to array by creating a new object and adding it to the array
+
+        todos.value.push(
+          {
+            content: newTodo.value.content,
+            done: newTodo.value.done
+          } as unknown as Todo);
+        // todos.value.push({
+        //   // Fix type error
+        //   // ts(2322) Type '{ content: string; done: boolean; }' is not assignable to type 'Todo'.
+
+        //   // @ts-ignore
+        //   content: newTodo.value.content,
+        //   done: newTodo.value.done
+        // });
       }
+
       saveData();
+
+      // Clear input
+      newTodo.value.content = '';
     }
+
     function doneTodo(todo: { done: boolean; }) {
       todo.done = !todo.done
       saveData();
@@ -72,7 +98,7 @@ export default {
     }
     function removeAll() {
       confirm('Are you sure you want to remove all todos?');
-
+      todos.value = [];
       localStorage.setItem('todos', JSON.stringify([]));
       saveData();
     }
