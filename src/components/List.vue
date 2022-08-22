@@ -32,16 +32,25 @@
 
 <script lang="ts">
 
+import GetData from '@/API';
+import { WebTodo } from '@/WebTodos';
 import { ref } from 'vue';
 export default {
   name: 'App',
-  setup() {
+  async setup() {
     const newTodo = ref({ content: '', done: false });
     const defaultData = [{
       done: false,
       content: 'Write a blog post'
     }]
-    const todosData = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
+    // Local storage
+    // const todosData = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
+    const localTodos = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
+    let webData = await GetData<WebTodo>().then(data =>
+      data.map(item => { return { content: item.title, done: item.completed } }));
+
+    // Web example
+    const todosData = webData ?? localTodos ?? defaultData;
     const todos = ref(todosData);
     function addTodo() {
       if (newTodo.value) {
