@@ -54,7 +54,7 @@ export default {
       data.map(item => {
         // return as todo object
         return item as Todo
-      })).catch(err => console.error("Couldn't get todos :(")) ?? [];
+      })).catch(err => console.error("Couldn't get todos :(\n" + err)) ?? [];
 
 
     const todosData: Todo[] = localTodos?.concat(...(webData.length > 0 ? webData : defaultData));
