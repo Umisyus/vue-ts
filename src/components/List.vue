@@ -4,9 +4,9 @@
     <label>New ToDo </label>
 
     <!-- Object which stores todo data and is passed to the event handler -->
-    <input v-model="newTodo.content" name="newTodo" autocomplete="off">
+    <input v-model="newTodo.title" name="newTodo" autocomplete="off">
     <!-- Done checkbox -->
-    <input type="checkbox" v-model="newTodo.done">
+    <input type="checkbox" v-model="newTodo.completed">
 
     <button>Add ToDo</button>
   </form>
@@ -16,12 +16,13 @@
   <button @click="removeAll()">Remove All</button>
   <ul>
 
-    <li v-for="(todo, index) in todos" :key="index">
+    <li v-for="({ title, completed }, index) in todos" :key="index">
       <!-- // Mark done -->
-      <div v-if="todo.done"> √ </div>
+
+      <div v-if="completed"> √ </div>
       <div v-else> X </div>
-      <span :class="{ done: todo.done }" @click="doneTodo(todo)">
-        {{ todo.content }}
+      <span :class="{ done: completed }" @click="doneTodo(todo)">
+        {{ title }}
       </span>
       <!-- // Delete -->
       <button @click="removeTodo(index)">Remove</button>
@@ -41,11 +42,9 @@ import { Todo } from './Data/Todo';
 export default {
   name: 'App',
   async setup() {
-    const newTodo = ref({ content: '', done: false });
-    const defaultData = [{
-      done: false,
-      content: 'Write a blog post'
-    }]
+    const newTodo = ref({} as Todo);
+
+    const defaultData: Todo[] = [{ id: 0, title: 'Learn Vue', completed: false } as Todo];
     // Local storage
     // const todosData = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
     const localTodos: Todo[] = JSON.parse(localStorage.getItem('todos')!) ?? defaultData;
@@ -53,7 +52,8 @@ export default {
     // Web example
     let webData = await GetData<WebTodo>().then(data =>
       data.map(item => {
-        return { content: item.title, done: item.completed }
+        // return as todo object
+        return item as Todo
         // Fix type error
       })) as Todo[];
 
@@ -61,17 +61,14 @@ export default {
 
     const todosData: Todo[] =
       localTodos.concat(webData) ?? defaultData;
+
     const todos = ref(todosData);
 
     function addTodo() {
       if (newTodo.value) {
         //push todo to array by creating a new object and adding it to the array
 
-        todos.value.push(
-          {
-            content: newTodo.value.content,
-            done: newTodo.value.done
-          } as unknown as Todo);
+        todos.value.push({ ...newTodo.value } as Todo);
         // todos.value.push({
         //   // Fix type error
         //   // ts(2322) Type '{ content: string; done: boolean; }' is not assignable to type 'Todo'.
@@ -85,11 +82,11 @@ export default {
       saveData();
 
       // Clear input
-      newTodo.value.content = '';
+      newTodo.value.title = '';
     }
 
-    function doneTodo(todo: { done: boolean; }) {
-      todo.done = !todo.done
+    function doneTodo(todo: Todo) {
+      todo.completed = !todo.completed
       saveData();
     }
     function removeTodo(index: number) {
