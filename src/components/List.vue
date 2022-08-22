@@ -54,29 +54,17 @@ export default {
       data.map(item => {
         // return as todo object
         return item as Todo
-        // Fix type error
-      })) as Todo[];
+      })).catch(err => console.error("Couldn't get todos :(")) ?? [];
 
-    webData = []
 
-    const todosData: Todo[] =
-      localTodos.concat(webData) ?? defaultData;
+    const todosData: Todo[] = localTodos?.concat(...(webData.length > 0 ? webData : defaultData));
 
     const todos = ref(todosData);
 
     function addTodo() {
       if (newTodo.value) {
-        //push todo to array by creating a new object and adding it to the array
-
+        // Push todo to array by creating a new object and adding it to the array
         todos.value.push({ ...newTodo.value } as Todo);
-        // todos.value.push({
-        //   // Fix type error
-        //   // ts(2322) Type '{ content: string; done: boolean; }' is not assignable to type 'Todo'.
-
-        //   // @ts-ignore
-        //   content: newTodo.value.content,
-        //   done: newTodo.value.done
-        // });
       }
 
       saveData();
