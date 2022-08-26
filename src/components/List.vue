@@ -16,13 +16,13 @@
   <button @click="removeAll()">Remove All</button>
   <ul>
 
-    <li v-for="({ title, completed }, index) in todos" :key="index">
+    <li v-for="(todo, index) in todos" :key="index">
       <!-- // Mark done -->
 
-      <div v-if="completed"> √ </div>
+      <div v-if="todo.completed"> √ </div>
       <div v-else> X </div>
-      <span :class="{ done: completed }" @click="doneTodo(todo)">
-        {{ title }}
+      <span :class="{ done: todo.completed }" @click="doneTodo(todo)">
+        {{ todo.title }}
       </span>
       <!-- // Delete -->
       <button @click="removeTodo(index)">Remove</button>
